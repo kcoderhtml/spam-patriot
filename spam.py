@@ -23,6 +23,12 @@ headers = {
 
 # Generate random data
 def getRandom():
+    """
+    Generate random data for testing purposes.
+
+    Returns:
+        dict: A dictionary containing random data fields such as 'murmur', 'uid', 'first_name', 'last_name', 'phone', 'email', 'address', 'city', 'zip', and 'state'.
+    """
     random_data = {
         'murmur': ''.join(random.choices(string.ascii_lowercase + string.digits, k=32)),
         'uid': str(random.randint(1, 100000)),
@@ -38,6 +44,11 @@ def getRandom():
     return random_data
 
 def sendRequest():
+    """
+    Sends a request to the specified URL with a random number appended to it.
+    Uses random data obtained from the getRandom() function.
+    Prints the response text received from the server.
+    """
     urlwithnum =  url + str(random.randint(1000000000000, 9999999999999))
     random_data = getRandom()
     response = requests.post(urlwithnum, headers=headers, data=random_data)
@@ -46,12 +57,23 @@ def sendRequest():
 
 
 def spamRequests(num_requests, cooldown, cooldown2):
+    """
+    Sends a specified number of requests or runs in infinite mode, spamming requests indefinitely.
+
+    Args:
+        num_requests (int): The number of requests to send. If less than 100, it will be set to 100.
+        cooldown (float): The cooldown time between each request in seconds.
+        cooldown2 (float): The cooldown time between each batch of requests in seconds.
+
+    Returns:
+        None
+    """
     if num_requests < 100:
         print("Minimum number of requests is 100")
         print("Setting number of requests to 100")
         num_requests = 100
     elif num_requests == True:
-        print("Indefinet Mode Activated")
+        print("Indefinite Mode Activated")
         print("Cooldown between requests: " + str(cooldown) + " seconds")
         print("Press CTRL + C to stop")
         while True:
@@ -84,10 +106,13 @@ def spamRequests(num_requests, cooldown, cooldown2):
             thread.join()
 
 def signal_handler(signal, frame):
-        global stop_flag
-        stop_flag = True
-        print("\nCTRL + C pressed. Stopping...")
-        print("Please wait...")
+    """
+    Handles the signal interrupt (CTRL + C) and sets the stop_flag to True.
+    """
+    global stop_flag
+    stop_flag = True
+    print("\nCTRL + C pressed. Stopping...")
+    print("Please wait...")
 
 if __name__ == "__main__":
     threads = []
