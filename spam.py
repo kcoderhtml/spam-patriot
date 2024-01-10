@@ -42,15 +42,20 @@ def sendRequest():
     response = requests.post(urlwithnum, headers=headers, data=random_data)
     print(response.text)
 
-def spamRequests(num_requests, cooldown):
-    threads = []
-    for _ in range(num_requests):
-        thread = threading.Thread(target=sendRequest)
-        thread.start()
-        threads.append(thread)
-        time.sleep(cooldown)
-    
-    for thread in threads:
-        thread.join()
 
-spamRequests(100, 0.1)  # Send 10 requests with a cooldown of 1 second
+
+def spamRequests(num_requests, cooldown, cooldown2):
+    if num_requests < 100:
+        num_requests = 100
+    elif num_requests == True:
+        threads = []
+        while True:
+            for _ in range(100):
+                thread = threading.Thread(target=sendRequest)
+                thread.start()
+                threads.append(thread)
+                thread.join()
+                time.sleep(cooldown)
+            time.sleep(cooldown2)
+
+spamRequests(1000, 0.01, 0.5)
