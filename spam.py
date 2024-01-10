@@ -3,6 +3,7 @@ import requests
 import string
 import threading
 import time
+import signal
 
 from faker import Faker
 fake = Faker()
@@ -45,7 +46,6 @@ def sendRequest():
 
 
 def spamRequests(num_requests, cooldown, cooldown2):
-    threads = []
     if num_requests < 100:
         print("Minimum number of requests is 100")
         print("Setting number of requests to 100")
@@ -54,9 +54,12 @@ def spamRequests(num_requests, cooldown, cooldown2):
         print("Indefinet Mode Activated")
         print("Cooldown between requests: " + str(cooldown) + " seconds")
         print("Press CTRL + C to stop")
-        threads = []
         while True:
+            if stop_flag:
+                break
             for _ in range(100):
+                if stop_flag:
+                    break
                 thread = threading.Thread(target=sendRequest)
                 thread.start()
                 threads.append(thread)
@@ -66,13 +69,28 @@ def spamRequests(num_requests, cooldown, cooldown2):
     else:
         print("Spamming " + str(num_requests) + " requests")
         print("Cooldown between requests: " + str(cooldown) + " seconds")
-        for _ in range(num_requests / 100):
+        for _ in range(int(num_requests / 100)):
+            if stop_flag:
+                break
             for _ in range(100):
+                if stop_flag:
+                    break
                 thread = threading.Thread(target=sendRequest)
                 thread.start()
                 threads.append(thread)
-                thread.join()
                 time.sleep(cooldown)
             time.sleep(cooldown2)
+        for thread in threads:
+            thread.join()
 
-spamRequests(True, 0.01, 0.5)
+def signal_handler(signal, frame):
+        global stop_flag
+        stop_flag = True
+        print("\nCTRL + C pressed. Stopping...")
+        print("Please wait...")
+
+if __name__ == "__main__":
+    threads = []
+    stop_flag = False
+    signal.signal(signal.SIGINT, signal_handler)
+    spamRequests(10000, 0.05, 3)
