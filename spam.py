@@ -2,11 +2,12 @@ import random
 import requests
 import string
 import threading
+import time
 
 from faker import Faker
 fake = Faker()
 
-url = 'https://www.hhposall.xyz/php/app/index/verify-info.php?t=1704912499601'
+url = 'https://www.hhposall.xyz/php/app/index/verify-info.php?t='
 
 headers = {
     'sec-ch-ua': '"Not_A Brand";v="8", "Chromium";v="120"',
@@ -21,7 +22,7 @@ headers = {
 
 # Generate random data
 def getRandom():
-	random_data = {
+    random_data = {
         'murmur': ''.join(random.choices(string.ascii_lowercase + string.digits, k=32)),
         'uid': str(random.randint(1, 100000)),
         'first_name': fake.first_name(),
@@ -33,12 +34,23 @@ def getRandom():
         'zip': fake.zipcode(),
         'state': fake.state_abbr()  # You can modify this according to your needs
     }
-	return random_data
+    return random_data
 
 def sendRequest():
+    urlwithnum =  url + str(random.randint(1000000000000, 9999999999999))
     random_data = getRandom()
-    response = requests.post(url, headers=headers, data=random_data)
+    response = requests.post(urlwithnum, headers=headers, data=random_data)
     print(response.text)
 
-for i in range(10):
-    sendRequest()
+def spamRequests(num_requests, cooldown):
+    threads = []
+    for _ in range(num_requests):
+        thread = threading.Thread(target=sendRequest)
+        thread.start()
+        threads.append(thread)
+        time.sleep(cooldown)
+    
+    for thread in threads:
+        thread.join()
+
+spamRequests(100, 0.1)  # Send 10 requests with a cooldown of 1 second
