@@ -1,5 +1,7 @@
 #!/bin/sh
 
+
+
 curl 'https://www.hhposall.xyz/php/app/index/verify-info.php?t=1704912499601' \
   -H 'sec-ch-ua: "Not_A Brand";v="8", "Chromium";v="120"' \
   -H 'DNT: 1' \
