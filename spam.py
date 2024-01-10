@@ -45,9 +45,15 @@ def sendRequest():
 
 
 def spamRequests(num_requests, cooldown, cooldown2):
+    threads = []
     if num_requests < 100:
+        print("Minimum number of requests is 100")
+        print("Setting number of requests to 100")
         num_requests = 100
     elif num_requests == True:
+        print("Indefinet Mode Activated")
+        print("Cooldown between requests: " + str(cooldown) + " seconds")
+        print("Press CTRL + C to stop")
         threads = []
         while True:
             for _ in range(100):
@@ -57,5 +63,16 @@ def spamRequests(num_requests, cooldown, cooldown2):
                 thread.join()
                 time.sleep(cooldown)
             time.sleep(cooldown2)
+    else:
+        print("Spamming " + str(num_requests) + " requests")
+        print("Cooldown between requests: " + str(cooldown) + " seconds")
+        for _ in range(num_requests / 100):
+            for _ in range(100):
+                thread = threading.Thread(target=sendRequest)
+                thread.start()
+                threads.append(thread)
+                thread.join()
+                time.sleep(cooldown)
+            time.sleep(cooldown2)
 
-spamRequests(1000, 0.01, 0.5)
+spamRequests(True, 0.01, 0.5)
