@@ -50,3 +50,9 @@ To adapt this to your target you will need to modify the following:
     ```python
     spamRequests(10000, False, 0.05, 3)
     ```
+
+## Running
+To run you will need the following packages: random, requests, string, threading, time, signal, and faker. Most of these should come pre installed with python except for faker which can be installed with:
+    ```bash
+    pip3 install faker
+    ```
