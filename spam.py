@@ -56,12 +56,13 @@ def sendRequest():
 
 
 
-def spamRequests(num_requests, cooldown, cooldown2):
+def spamRequests(num_requests, infinite, cooldown, cooldown2):
     """
     Sends a specified number of requests or runs in infinite mode, spamming requests indefinitely.
 
     Args:
         num_requests (int): The number of requests to send. If less than 100, it will be set to 100.
+        infinite (bool): Flag indicating whether to run in infinite mode or not.
         cooldown (float): The cooldown time between each request in seconds.
         cooldown2 (float): The cooldown time between each batch of requests in seconds.
 
@@ -72,7 +73,7 @@ def spamRequests(num_requests, cooldown, cooldown2):
         print("Minimum number of requests is 100")
         print("Setting number of requests to 100")
         num_requests = 100
-    elif num_requests == True:
+    elif infinite == True:
         print("Indefinite Mode Activated")
         print("Cooldown between requests: " + str(cooldown) + " seconds")
         print("Press CTRL + C to stop")
@@ -118,4 +119,4 @@ if __name__ == "__main__":
     threads = []
     stop_flag = False
     signal.signal(signal.SIGINT, signal_handler)
-    spamRequests(10000, 0.05, 3)
+    spamRequests(10000, False, 0.05, 3)
