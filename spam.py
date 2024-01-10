@@ -1,14 +1,10 @@
-import requests
 import random
+import requests
 import string
+import threading
 
 from faker import Faker
 fake = Faker()
-
-
-# 'Lucy Cechtelar'
-
-fake.address()
 
 url = 'https://www.hhposall.xyz/php/app/index/verify-info.php?t=1704912499601'
 
@@ -24,24 +20,25 @@ headers = {
 }
 
 # Generate random data
-random_data = {
-    'murmur': ''.join(random.choices(string.ascii_lowercase + string.digits, k=32)),
-    'uid': str(random.randint(1, 100000)),
-    'first_name': fake.first_name(),
-    'last_name': fake.last_name(),
-    'phone': fake.phone_number(),
-    'email': fake.email(),
-    'address': fake.address(),
-    'city': fake.city(),
-    'zip': fake.zipcode(),
-    'state': fake.state_abbr()  # You can modify this according to your needs
-}
+def getRandom():
+	random_data = {
+        'murmur': ''.join(random.choices(string.ascii_lowercase + string.digits, k=32)),
+        'uid': str(random.randint(1, 100000)),
+        'first_name': fake.first_name(),
+        'last_name': fake.last_name(),
+        'phone': fake.phone_number(),
+        'email': fake.email(),
+        'address': fake.address(),
+        'city': fake.city(),
+        'zip': fake.zipcode(),
+        'state': fake.state_abbr()  # You can modify this according to your needs
+    }
+	return random_data
 
-print(random_data)
+def sendRequest():
+    random_data = getRandom()
+    response = requests.post(url, headers=headers, data=random_data)
+    print(response.text)
 
-# Send POST request
-# response = requests.post(url, headers=headers, data=random_data)
-
-# Print response
-# print(response.text)
-
+for i in range(10):
+    sendRequest()
