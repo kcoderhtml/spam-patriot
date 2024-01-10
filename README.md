@@ -22,31 +22,31 @@ With the base config straight out of this repo it will spam [https://www.hhposal
 ## Configuration
 To adapt this to your target you will need to modify the following:
 1. The data fields; change the keys to be the keys of the targets api and the data to be the correct faker values (line 26: spam.py):
-```python
-random_data = {
-    'murmur': ''.join(random.choices(string.ascii_lowercase + string.digits, k=32)),
-    'uid': str(random.randint(1, 100000)),
-    'first_name': fake.first_name(),
-    'last_name': fake.last_name(),
-    'phone': fake.phone_number(),
-    'email': fake.email(),
-    'address': fake.address(),
-    'city': fake.city(),
-    'zip': fake.zipcode(),
-    'state': fake.state_abbr()  # You can modify this according to your needs
-}
-```
+    ```python
+    random_data = {
+        'murmur': ''.join(random.choices(string.ascii_lowercase + string.digits, k=32)),
+        'uid': str(random.randint(1, 100000)),
+        'first_name': fake.first_name(),
+        'last_name': fake.last_name(),
+        'phone': fake.phone_number(),
+        'email': fake.email(),
+        'address': fake.address(),
+        'city': fake.city(),
+        'zip': fake.zipcode(),
+        'state': fake.state_abbr()  # You can modify this according to your needs
+    }
+    ```
 2. The correct URL (line 11: spam.py):
-```python
-url = 'https://www.hhposall.xyz/php/app/index/verify-info.php?t='
-```
+    ```python
+    url = 'https://www.hhposall.xyz/php/app/index/verify-info.php?t='
+    ```
 
 3. Any url parameters that need to be randomized (line 42: spam.py):
-```python
-urlwithnum =  url + str(random.randint(1000000000000, 9999999999999))
-```
+    ```python
+    urlwithnum =  url + str(random.randint(1000000000000, 9999999999999))
+    ```
 
 4. Set running mode; the first paramter is the spam count; second is whether to run in infinite mode (first param wouldn't matter then) or not; time between thread creation; and time between batch of 100 threads (line 122: spam.py):
-```python
-spamRequests(10000, False, 0.05, 3)
-```
+    ```python
+    spamRequests(10000, False, 0.05, 3)
+    ```
