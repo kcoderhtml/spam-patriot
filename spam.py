@@ -14,6 +14,7 @@ fake = Faker()
 # pull proxies from file
 
 SOCK5_FILE = 'socks5_proxies.txt'  # Path to the file containing SOCKS5 proxies, one per line (inluding port)
+count = 0
 
 # ex:
 
@@ -75,16 +76,19 @@ def getRandom():
     }
     return random_data
 
-def sendRequest():
+def sendRequest(runproxy):
     """
     Sends a request to the specified URL with a random number appended to it.
     Uses random data obtained from the getRandom() function.
     Prints the response text received from the server.
     """
+
+    global count
     # Set up the SOCKS proxy to route through a public SOCKS5 proxy
-    proxy = randomProxy()
-    socks.set_default_proxy(socks.SOCKS5, proxy['address'], int(proxy['port']))
-    socket.socket = socks.socksocket
+    if runproxy:
+        proxy = randomProxy()
+        socks.set_default_proxy(socks.SOCKS5, proxy['address'], int(proxy['port']))
+        socket.socket = socks.socksocket
 
     urlwithnum = url + str(random.randint(1000000000000, 9999999999999))
     random_data = getRandom()
@@ -93,11 +97,13 @@ def sendRequest():
     except requests.exceptions.ConnectionError:
         print("Connection Error, skipping request")
         # remove proxy from list, it's probably dead.
-        proxy_addresses.remove(proxy)
-    print(response.text)
+        if runproxy:
+            proxy_addresses.remove(proxy)
+    count += 1
+    print(response.text + " count: " + str(count) + " money wasted: $" + str(count * 0.0025))
 
 
-def spamRequests(num_requests, infinite, cooldown, cooldown2):
+def spamRequests(num_requests, infinite, cooldown, cooldown2, proxy):
     """
     Sends a specified number of requests or runs in infinite mode, spamming requests indefinitely.
 
@@ -106,6 +112,7 @@ def spamRequests(num_requests, infinite, cooldown, cooldown2):
         infinite (bool): Flag indicating whether to run in infinite mode or not.
         cooldown (float): The cooldown time between each request in seconds.
         cooldown2 (float): The cooldown time between each batch of requests in seconds.
+        proxy (bool): Flag indicating whether to use a proxy or not.
 
     Returns:
         None
@@ -124,7 +131,7 @@ def spamRequests(num_requests, infinite, cooldown, cooldown2):
             for _ in range(100):
                 if stop_flag:
                     break
-                thread = threading.Thread(target=sendRequest)
+                thread = threading.Thread(target=sendRequest(proxy))
                 thread.start()
                 threads.append(thread)
                 thread.join()
@@ -162,4 +169,4 @@ if __name__ == "__main__":
     threads = []
     stop_flag = False
     signal.signal(signal.SIGINT, signal_handler)
-    spamRequests(10000, False, 0.05, 3)
+    spamRequests(10000, False, 0.05, 3, False)
