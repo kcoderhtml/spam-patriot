@@ -25,10 +25,15 @@ count = 0
 # etc...
 
 print("Loading proxies...")
-with open(SOCK5_FILE) as f:
-    proxies = f.readlines()
-    prox_addresses_full = [x.strip() for x in proxies]
-    proxy_addresses = [{'address': prx.split(':')[0], 'port': prx.split(':')[1]} for prx in prox_addresses_full]
+try:
+    with open(SOCK5_FILE) as f:
+        proxies = f.readlines()
+        prox_addresses_full = [x.strip() for x in proxies]
+        proxy_addresses = [{'address': prx.split(':')[0], 'port': prx.split(':')[1]} for prx in prox_addresses_full]
+except FileNotFoundError:
+    print("Error: SOCKS5 proxy file not found.")
+except Exception as e:
+    print("Error:", str(e))
 print("Loaded " + str(len(proxy_addresses)) + " proxies")
 
 url = 'https://www.hhposall.xyz/php/app/index/verify-info.php?t='
