@@ -123,6 +123,9 @@ def spamRequests(num_requests, infinite, cooldown, cooldown2, proxy):
     Returns:
         None
     """
+    if proxies == []:
+        proxy = False
+
     if num_requests < 100:
         print("Minimum number of requests is 100")
         print("Setting number of requests to 100")
