@@ -108,18 +108,23 @@ def sendRequest(runproxy):
         # remove proxy from list, it's probably dead.
         if runproxy:
             proxy_addresses.remove(proxy)
+    except requests.exceptions.RequestException as e:
+        print("Error: " + str(e))
     else:
-        count += 1
-        print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " - " + response.text + " count: " + str(count) + " money wasted: $" + str(count * 0.0025))
-        if count % 1000 == 999:
-            print("Sending slack message...")
-            slack_data = {
-                "money": str("$" + str(count * 0.0025)),
-                "count": str(count)
-            }
-            print(slack_data)
-            slack = requests.post('https://hooks.slack.com/triggers/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', data=json.dumps(slack_data))
-            print("Sent slack message: " + slack.text)
+        if response.status_code == 200:
+            count += 1
+            print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " - " + response.text + " count: " + str(count) + " money wasted: $" + str(count * 0.0025))
+            if count % 1000 == 999:
+                print("Sending slack message...")
+                slack_data = {
+                    "money": str("$" + str(count * 0.0025)),
+                    "count": str(count)
+                }
+                print(slack_data)
+                slack = requests.post('https://hooks.slack.com/triggers/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', data=json.dumps(slack_data))
+                print("Sent slack message: " + slack.text)
+        else:
+            print("YESSSSSSSSSSSssssss!!!!: " + str(response.status_code))
 
 
 def spamRequests(num_requests, infinite, cooldown, cooldown2, proxy):
