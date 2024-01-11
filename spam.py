@@ -93,6 +93,7 @@ def sendRequest():
     except requests.exceptions.ConnectionError:
         print("Connection Error, skipping request")
         # remove proxy from list, it's probably dead.
+        proxy_addresses.remove(proxy)
     print(response.text)
 
 
