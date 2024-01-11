@@ -11,10 +11,19 @@ from faker import Faker
 
 fake = Faker()
 
-# pull proxies from socks5_proxies.txt
+# pull proxies from file
+
+SOCK5_FILE = 'socks5_proxies.txt'  # Path to the file containing SOCKS5 proxies, one per line (inluding port)
+
+# ex:
+
+# 255.255.255.255:9999
+# 255.255.255.255:9999
+# 255.255.255.255:9999
+# etc...
 
 print("Loading proxies...")
-with open('socks5_proxies.txt') as f:
+with open(SOCK5_FILE) as f:
     proxies = f.readlines()
     prox_addresses_full = [x.strip() for x in proxies]
     proxy_addresses = [{'address': prx.split(':')[0], 'port': prx.split(':')[1]} for prx in prox_addresses_full]
