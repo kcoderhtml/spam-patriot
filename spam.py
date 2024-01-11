@@ -32,6 +32,7 @@ try:
         proxy_addresses = [{'address': prx.split(':')[0], 'port': prx.split(':')[1]} for prx in prox_addresses_full]
 except FileNotFoundError:
     print("Error: SOCKS5 proxy file not found.")
+    proxy_addresses = []
 except Exception as e:
     print("Error:", str(e))
 else:
@@ -125,7 +126,7 @@ def spamRequests(num_requests, infinite, cooldown, cooldown2, proxy):
     Returns:
         None
     """
-    if proxies == []:
+    if proxy_addresses == []:
         proxy = False
 
     if num_requests < 100:
