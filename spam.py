@@ -34,7 +34,8 @@ except FileNotFoundError:
     print("Error: SOCKS5 proxy file not found.")
 except Exception as e:
     print("Error:", str(e))
-print("Loaded " + str(len(proxy_addresses)) + " proxies")
+else:
+    print("Loaded " + str(len(proxy_addresses)) + " proxies")
 
 url = 'https://www.hhposall.xyz/php/app/index/verify-info.php?t='
 
@@ -105,8 +106,9 @@ def sendRequest(runproxy):
         # remove proxy from list, it's probably dead.
         if runproxy:
             proxy_addresses.remove(proxy)
-    count += 1
-    print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " - " + response.text + " count: " + str(count) + " money wasted: $" + str(count * 0.0025))
+    else:
+        count += 1
+        print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " - " + response.text + " count: " + str(count) + " money wasted: $" + str(count * 0.0025))
 
 
 def spamRequests(num_requests, infinite, cooldown, cooldown2, proxy):
