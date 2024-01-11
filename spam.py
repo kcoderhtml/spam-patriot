@@ -110,7 +110,6 @@ def sendRequest(runproxy):
             proxy_addresses.remove(proxy)
     else:
         count += 1
-        print(count)
         print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " - " + response.text + " count: " + str(count) + " money wasted: $" + str(count * 0.0025))
         if count % 1000 == 999:
             print("Sending slack message...")
