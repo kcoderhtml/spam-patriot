@@ -4,9 +4,30 @@ import string
 import threading
 import time
 import signal
+import socks
+import socket
 
 from faker import Faker
+
 fake = Faker()
+
+# pull proxies from file
+
+SOCK5_FILE = 'socks5_proxies.txt'  # Path to the file containing SOCKS5 proxies, one per line (inluding port)
+
+# ex:
+
+# 255.255.255.255:9999
+# 255.255.255.255:9999
+# 255.255.255.255:9999
+# etc...
+
+print("Loading proxies...")
+with open(SOCK5_FILE) as f:
+    proxies = f.readlines()
+    prox_addresses_full = [x.strip() for x in proxies]
+    proxy_addresses = [{'address': prx.split(':')[0], 'port': prx.split(':')[1]} for prx in prox_addresses_full]
+print("Loaded " + str(len(proxy_addresses)) + " proxies")
 
 url = 'https://www.hhposall.xyz/php/app/index/verify-info.php?t='
 
@@ -20,6 +41,17 @@ headers = {
     'Referer': 'https://www.usavdfaadf.xyz/',
     'sec-ch-ua-platform': '"macOS"'
 }
+
+
+def randomProxy():
+    """
+    Returns a random proxy from the list of proxies.
+
+    Returns:
+        dict: A dictionary containing the proxy address and port.
+    """
+    return random.choice(proxy_addresses)
+
 
 # Generate random data
 def getRandom():
@@ -49,11 +81,20 @@ def sendRequest():
     Uses random data obtained from the getRandom() function.
     Prints the response text received from the server.
     """
-    urlwithnum =  url + str(random.randint(1000000000000, 9999999999999))
-    random_data = getRandom()
-    response = requests.post(urlwithnum, headers=headers, data=random_data)
-    print(response.text)
+    # Set up the SOCKS proxy to route through a public SOCKS5 proxy
+    proxy = randomProxy()
+    socks.set_default_proxy(socks.SOCKS5, proxy['address'], int(proxy['port']))
+    socket.socket = socks.socksocket
 
+    urlwithnum = url + str(random.randint(1000000000000, 9999999999999))
+    random_data = getRandom()
+    try:
+        response = requests.post(urlwithnum, headers=headers, data=random_data)
+    except requests.exceptions.ConnectionError:
+        print("Connection Error, skipping request")
+        # remove proxy from list, it's probably dead.
+        proxy_addresses.remove(proxy)
+    print(response.text)
 
 
 def spamRequests(num_requests, infinite, cooldown, cooldown2):
@@ -106,6 +147,7 @@ def spamRequests(num_requests, infinite, cooldown, cooldown2):
         for thread in threads:
             thread.join()
 
+
 def signal_handler(signal, frame):
     """
     Handles the signal interrupt (CTRL + C) and sets the stop_flag to True.
@@ -114,6 +156,7 @@ def signal_handler(signal, frame):
     stop_flag = True
     print("\nCTRL + C pressed. Stopping...")
     print("Please wait...")
+
 
 if __name__ == "__main__":
     threads = []
