@@ -114,18 +114,24 @@ def sendRequest(runproxy):
         if response.status_code == 200:
             count += 1
             print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " - " + response.text + " count: " + str(count) + " money wasted: $" + str(count * 0.0025))
-            if count % 1000 == 999:
-                print("Sending slack message...")
-                slack_data = {
-                    "money": str("$" + str(count * 0.0025)),
-                    "count": str(count)
-                }
-                print(slack_data)
-                slack = requests.post('https://hooks.slack.com/triggers/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', data=json.dumps(slack_data))
-                print("Sent slack message: " + slack.text)
         else:
             print("YESSSSSSSSSSSssssss!!!!: " + str(response.status_code))
-
+minicount = 0
+def sendSlackMessage():
+    global minicount
+    if minicount == 10:
+        minicount = 0
+        print("Sending slack message...")
+        slack_data = {
+            "money": str("$" + str(count * 0.0025)),
+            "count": str(count)
+        }
+        print(slack_data)
+        slack = requests.post('https://hooks.slack.com/triggers/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', data=json.dumps(slack_data))
+        print("Sent slack message: " + slack.text)
+    else:
+        minicount += 1
+        print("Not sending slack message... " + str(minicount) + "/10")
 
 def spamRequests(num_requests, infinite, cooldown, cooldown2, proxy):
     """
@@ -164,6 +170,7 @@ def spamRequests(num_requests, infinite, cooldown, cooldown2, proxy):
                 thread.join()
                 time.sleep(cooldown)
             time.sleep(cooldown2)
+            sendSlackMessage()
     else:
         print("Spamming " + str(num_requests) + " requests")
         print("Cooldown between requests: " + str(cooldown) + " seconds")
@@ -178,6 +185,7 @@ def spamRequests(num_requests, infinite, cooldown, cooldown2, proxy):
                 threads.append(thread)
                 time.sleep(cooldown)
             time.sleep(cooldown2)
+            sendSlackMessage()
         for thread in threads:
             thread.join()
 
