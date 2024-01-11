@@ -58,6 +58,8 @@ To adapt this to your target you will need to modify the following:
     ```python
     spamRequests(10000, False, 0.05, 3)
     ```
+
+5. Download a list of socks5 proxies in .txt single line `xxx.xxx.xxx:xxxx` format and save as `socks5_proxies.txt`
 ## Running
 To run you will need the following packages: random, requests, string, threading, time, signal, PySocks, and faker. Most of these should come pre installed with python except for faker and PySocks which can be installed with:
     ```bash
