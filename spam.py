@@ -132,7 +132,7 @@ def spamRequests(num_requests, infinite, cooldown, cooldown2, proxy):
             for _ in range(100):
                 if stop_flag:
                     break
-                thread = threading.Thread(target=sendRequest(proxy))
+                thread = threading.Thread(target=sendRequest, args=(proxy,))
                 thread.start()
                 threads.append(thread)
                 thread.join()
@@ -147,7 +147,7 @@ def spamRequests(num_requests, infinite, cooldown, cooldown2, proxy):
             for _ in range(100):
                 if stop_flag:
                     break
-                thread = threading.Thread(target=sendRequest)
+                thread = threading.Thread(target=sendRequest, args=(proxy,))
                 thread.start()
                 threads.append(thread)
                 time.sleep(cooldown)
