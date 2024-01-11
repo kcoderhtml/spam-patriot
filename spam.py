@@ -3,6 +3,7 @@ import requests
 import string
 import threading
 import time
+import datetime
 import signal
 import socks
 import socket
@@ -100,7 +101,7 @@ def sendRequest(runproxy):
         if runproxy:
             proxy_addresses.remove(proxy)
     count += 1
-    print(response.text + " count: " + str(count) + " money wasted: $" + str(count * 0.0025))
+    print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " - " + response.text + " count: " + str(count) + " money wasted: $" + str(count * 0.0025))
 
 
 def spamRequests(num_requests, infinite, cooldown, cooldown2, proxy):
