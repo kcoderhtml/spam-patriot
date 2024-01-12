@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "spam-patriot"
+version = "1.0.0"
+description = ""
+authors = ["Kokonico <kokonico@duck.com>", "Kieran Klukas <92754843+kcoderhtml@users.noreply.github.com>", "TechPro709 <61668117+Techpro709@users.noreply.github.com>", "V205 <V205Arduino@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+faker = "^22.2.0"
+requests = "^2.31.0"
+pysocks = "^1.7.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
