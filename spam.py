@@ -17,7 +17,7 @@ fake = Faker()
 
 SOCK5_FILE = 'socks5_proxies.txt'  # Path to the file containing SOCKS5 proxies, one per line (inluding port)
 count = 0
-
+startEpochTime = time.time_ns()
 # ex:
 
 # 255.255.255.255:9999
@@ -133,6 +133,20 @@ def sendSlackMessage():
         minicount += 1
         print("Not sending slack message... " + str(minicount) + "/10")
 
+def getAverageRequestsAndDuration():
+  print("Time since start: ")
+  currentEpochTime = time.time_ns()
+  timeSinceStart = 1
+  timeSinceStart = (currentEpochTime - startEpochTime) * 0.000000001 
+  print(timeSinceStart)
+  print(" seconds, Total requests: ")
+  print(count)
+  requestsPerSecond = count/timeSinceStart 
+  print(", Requests per second(on average): ")
+  print(requestsPerSecond)
+  print("Done, resuming requests")
+
+
 def spamRequests(num_requests, infinite, cooldown, cooldown2, proxy):
     """
     Sends a specified number of requests or runs in infinite mode, spamming requests indefinitely.
@@ -171,6 +185,8 @@ def spamRequests(num_requests, infinite, cooldown, cooldown2, proxy):
                 time.sleep(cooldown)
             time.sleep(cooldown2)
             sendSlackMessage()
+            getAverageRequestsAndDuration()
+
     else:
         print("Spamming " + str(num_requests) + " requests")
         print("Cooldown between requests: " + str(cooldown) + " seconds")
@@ -186,6 +202,8 @@ def spamRequests(num_requests, infinite, cooldown, cooldown2, proxy):
                 time.sleep(cooldown)
             time.sleep(cooldown2)
             sendSlackMessage()
+            getAverageRequestsAndDuration()
+
         for thread in threads:
             thread.join()
 
