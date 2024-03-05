@@ -1,2 +1,6 @@
 socks5_proxies.txt
 **workspace.xml
+**.idea
+**.DS_Store
+**.log
+**.log.*
