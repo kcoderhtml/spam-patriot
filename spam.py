@@ -20,7 +20,7 @@ class MockSlackMessage:
     def __init__(self):
         self.text = "Mocked Slack message"
 
-MUZZLE = True  # Set to True to enable fuzzling, this will not actually send requests and will fake the requests to no real endpoint (for development purposes)
+MUZZLE = False  # Set to True to enable fuzzling, this will not actually send requests and will fake the requests to no real endpoint (for development purposes)
 
 logger = LogNode("Spammer", log_file="spam.log", print_to_console=True, print_filter=[Info, Warn, Error, Fatal])
 
