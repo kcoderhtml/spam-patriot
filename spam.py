@@ -6,12 +6,19 @@ import time
 import datetime
 import signal
 import json
+
 import socks
 import socket
 
 from faker import Faker
 
 fake = Faker()
+
+class MockSlackMessage:
+    def __init__(self):
+        self.text = "Mocked Slack message"
+
+MUZZLE = False  # Set to True to enable fuzzling, this will not actually send requests and will fake the requests to no real endpoint (for development purposes)
 
 # pull proxies from file
 
@@ -36,6 +43,7 @@ except FileNotFoundError:
     proxy_addresses = []
 except Exception as e:
     print("Error:", str(e))
+    proxy_addresses = []
 else:
     print("Loaded " + str(len(proxy_addresses)) + " proxies")
 
@@ -91,10 +99,11 @@ def sendRequest(runproxy):
     Uses random data obtained from the getRandom() function.
     Prints the response text received from the server.
     """
+    global MUZZLE # for preformance reasons
 
     global count
     # Set up the SOCKS proxy to route through a public SOCKS5 proxy
-    if runproxy:
+    if runproxy and not MUZZLE:
         proxy = randomProxy()
         socks.set_default_proxy(socks.SOCKS5, proxy['address'], int(proxy['port']))
         socket.socket = socks.socksocket
@@ -102,11 +111,18 @@ def sendRequest(runproxy):
     urlwithnum = url + str(random.randint(1000000000000, 9999999999999))
     random_data = getRandom()
     try:
-        response = requests.post(urlwithnum, headers=headers, data=random_data)
+        if MUZZLE:
+            # generate a realistic looking response w/ fake data
+            response = requests.Response()
+            response.status_code = 200
+            response._content = b'{"status": "success", "message": "Your request has been received and is being processed."}'
+            print("Muzzling request...")
+        else:
+            response = requests.post(urlwithnum, headers=headers, data=random_data)
     except requests.exceptions.ConnectionError:
         print("Connection Error, skipping request")
         # remove proxy from list, it's probably dead.
-        if runproxy:
+        if runproxy and not MUZZLE:
             proxy_addresses.remove(proxy)
     except requests.exceptions.RequestException as e:
         print("Error: " + str(e))
@@ -118,6 +134,7 @@ def sendRequest(runproxy):
             print("YESSSSSSSSSSSssssss!!!!: " + str(response.status_code))
 minicount = 0
 def sendSlackMessage():
+    global MUZZLE
     global minicount
     if minicount == 10:
         minicount = 0
@@ -127,7 +144,10 @@ def sendSlackMessage():
             "count": str(count)
         }
         print(slack_data)
-        slack = requests.post('https://hooks.slack.com/triggers/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', data=json.dumps(slack_data))
+        if not MUZZLE:
+            slack = requests.post('https://hooks.slack.com/triggers/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', data=json.dumps(slack_data))
+        else:
+            slack = MockSlackMessage()
         print("Sent slack message: " + slack.text)
     else:
         minicount += 1
