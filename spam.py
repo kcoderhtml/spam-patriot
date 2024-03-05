@@ -6,12 +6,23 @@ import time
 import datetime
 import signal
 import json
+
 import socks
 import socket
+from objlog import LogNode, LogMessage
+from objlog.LogMessages import Debug, Info, Warn, Error, Fatal
 
 from faker import Faker
 
 fake = Faker()
+
+class MockSlackMessage:
+    def __init__(self):
+        self.text = "Mocked Slack message"
+
+MUZZLE = False  # Set to True to enable fuzzling, this will not actually send requests and will fake the requests to no real endpoint (for development purposes)
+
+logger = LogNode("Spammer", log_file="spam.log", print_to_console=True, print_filter=[Info, Warn, Error, Fatal])
 
 # pull proxies from file
 
@@ -25,19 +36,20 @@ startEpochTime = time.time_ns()
 # 255.255.255.255:9999
 # etc...
 
-print("Loading proxies...")
+logger.log(Info("Loading SOCKS5 proxies from file..."))
 try:
     with open(SOCK5_FILE) as f:
         proxies = f.readlines()
         prox_addresses_full = [x.strip() for x in proxies]
         proxy_addresses = [{'address': prx.split(':')[0], 'port': prx.split(':')[1]} for prx in prox_addresses_full]
 except FileNotFoundError:
-    print("Error: SOCKS5 proxy file not found.")
+    logger.log(Error("SOCKS5 proxies file not found. Will continue without proxies."))
     proxy_addresses = []
 except Exception as e:
-    print("Error:", str(e))
+    logger.log(Error("Error loading SOCKS5 proxies from file: " + str(e) + "Will continue without proxies."))
+    proxy_addresses = []
 else:
-    print("Loaded " + str(len(proxy_addresses)) + " proxies")
+    logger.log(Info("Loaded " + str(len(proxy_addresses)) + " proxies"))
 
 url = 'https://www.hhposall.xyz/php/app/index/verify-info.php?t='
 
@@ -91,10 +103,11 @@ def sendRequest(runproxy):
     Uses random data obtained from the getRandom() function.
     Prints the response text received from the server.
     """
+    global MUZZLE # for preformance reasons
 
     global count
     # Set up the SOCKS proxy to route through a public SOCKS5 proxy
-    if runproxy:
+    if runproxy and not MUZZLE:
         proxy = randomProxy()
         socks.set_default_proxy(socks.SOCKS5, proxy['address'], int(proxy['port']))
         socket.socket = socks.socksocket
@@ -102,22 +115,31 @@ def sendRequest(runproxy):
     urlwithnum = url + str(random.randint(1000000000000, 9999999999999))
     random_data = getRandom()
     try:
-        response = requests.post(urlwithnum, headers=headers, data=random_data)
+        if MUZZLE:
+            # generate a realistic looking response w/ fake data
+            logger.log(Info("Faking request to " + urlwithnum + " with data: " + str(random_data)))
+            response = requests.Response()
+            response.status_code = 200
+            response._content = b'{"status": "success", "message": "Your request has been received and is being processed."}'
+        else:
+            response = requests.post(urlwithnum, headers=headers, data=random_data)
+            logger.log(Info("Sent request to " + urlwithnum + " with data: " + str(random_data) + " and received response: " + response.text))
     except requests.exceptions.ConnectionError:
-        print("Connection Error, skipping request")
+        logger.log(Warn("Connection error, Skipping request."))
         # remove proxy from list, it's probably dead.
-        if runproxy:
+        if runproxy and not MUZZLE:
             proxy_addresses.remove(proxy)
     except requests.exceptions.RequestException as e:
-        print("Error: " + str(e))
+        logger.log(Error("Error sending request: " + str(e)))
     else:
         if response.status_code == 200:
             count += 1
-            print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " - " + response.text + " count: " + str(count) + " money wasted: $" + str(count * 0.0025))
+            logger.log(Info(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " - " + response.text + " count: " + str(count) + " money wasted: $" + str(count * 0.0025)))
         else:
-            print("YESSSSSSSSSSSssssss!!!!: " + str(response.status_code))
+            logger.log(Error("Received non-200 status code: " + str(response.status_code) + " with response: " + response.text))
 minicount = 0
 def sendSlackMessage():
+    global MUZZLE
     global minicount
     if minicount == 10:
         minicount = 0
@@ -127,11 +149,14 @@ def sendSlackMessage():
             "count": str(count)
         }
         print(slack_data)
-        slack = requests.post('https://hooks.slack.com/triggers/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', data=json.dumps(slack_data))
-        print("Sent slack message: " + slack.text)
+        if not MUZZLE:
+            slack = requests.post('https://hooks.slack.com/triggers/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', data=json.dumps(slack_data))
+        else:
+            slack = MockSlackMessage()
+        logger.log(Debug("Sent slack message with data: " + str(slack_data)))
     else:
         minicount += 1
-        print("Not sending slack message... " + str(minicount) + "/10")
+        logger.log(Debug("Not sending slack message... " + str(minicount) + "/10"))
 
 def getAverageRequestsAndDuration():
   print("Time since start: ")
@@ -165,13 +190,12 @@ def spamRequests(num_requests, infinite, cooldown, cooldown2, proxy):
         proxy = False
 
     if num_requests < 100:
-        print("Minimum number of requests is 100")
-        print("Setting number of requests to 100")
+        logger.log(Warn("Number of requests is less than 100, setting to 100."))
         num_requests = 100
     elif infinite == True:
-        print("Indefinite Mode Activated")
-        print("Cooldown between requests: " + str(cooldown) + " seconds")
-        print("Press CTRL + C to stop")
+        logger.log(Info("Running in infinite mode."))
+        logger.log(Info("cooldown: " + str(cooldown) + " seconds."))
+        logger.log(Info("Press CTRL + C to stop."))
         while True:
             if stop_flag:
                 break
